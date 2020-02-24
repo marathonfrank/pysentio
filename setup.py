@@ -23,7 +23,7 @@ def find_version(*file_paths):
 
 setuptools.setup(
     name="pysentio", 
-    version=find_version('pysentio_pkg', 'const.py'),
+    version=find_version('pysentio', 'const.py'),
     author="Ake Strandberg",
     author_email="ake@strandberg.eu",
     description="Python library for Sentio Pro Sauna Controller",
@@ -42,4 +42,5 @@ setuptools.setup(
         'Development Status :: 3 - Alpha',
     ],
     python_requires='>=3.6',
+    install_requires=["pyserial>=3.4"],
 )

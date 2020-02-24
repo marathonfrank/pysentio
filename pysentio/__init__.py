@@ -1,7 +1,8 @@
-from serial import Serial, SerialException
+from pyserial import Serial, SerialException
 from const import NAME, VERSION, DEFAULT_BAUD, DEFAULT_SERIALPORT
 import logging
 
+__version__ = VERSION
 _LOGGER = logging.getLogger(NAME)
 
 class SentioPro:

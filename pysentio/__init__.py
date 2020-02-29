@@ -1,5 +1,9 @@
 from homeassistant.components.climate.const import HVAC_MODE_OFF, HVAC_MODE_HEAT
 from homeassistant.const import STATE_OFF, STATE_ON
+#HVAC_MODE_OFF = 'off'
+#HVAC_MODE_ON = 'on'
+#STATE_ON = 'on'
+#STATE_OFF = 'off'
 from serial import Serial, SerialException
 from .const import NAME, VERSION, DEFAULT_BAUD, DEFAULT_SERIALPORT, SERIAL_READ_TIMEOUT
 import logging
@@ -28,8 +32,9 @@ class SentioPro:
     _user_prog_val = 1
     _config = ''
     _sw_version = ''
-    _model = ''
-    
+    _type = ''
+    _status = ''
+
     def __init__(self, port, baud, timeout=SERIAL_READ_TIMEOUT):
         self._port = port
         self._baud = baud
@@ -96,11 +101,18 @@ class SentioPro:
                 self._heattimer_val = int(pc1.replace('min', ''))
 
         elif piece[0] == 'CONFIG':
-            self._config = resp
+            piece2 = resp.replace(';', '')
+            self._config = piece2.split()
+
+        elif piece[0] == 'STATUS':
+            piece2 = resp.replace(';', '')
+            self._status = piece2.split()
 
         elif piece[0] == 'INFO':
-            self._sw_version = piece[2]
-            self._type = piece[4]
+            piece2 = resp.replace(';', '')
+            piece2 = piece2.split()
+            self._sw_version = piece2[2]
+            self._type = piece2[4]
 
     def update(self):
         resp = self._write_read('get light\n')
@@ -114,9 +126,12 @@ class SentioPro:
         resp = self._write_read('get heattimer\n')
         resp = self._write_read('get heattimer val\n')
 
-    def get_config(self)
+    def get_config(self):
         self._write_read('get config\n')
-        self._write_read('get info\n')    
+        self._write_read('get info\n')
+
+    def get_status(self):
+        self._write_read('get status\n')
 
     def _write_cmd(self, cmd):
         """Write a cmd."""
@@ -136,7 +151,6 @@ class SentioPro:
             qq = self._serial.write(mesg)
             ret = self._serial.read_until(';\r\n'.encode('utf-8'), 400).decode("utf-8")
             _LOGGER.debug("Response->%s".strip(), ret)
-#            print('Response->{}'.format(ret))
             self._parse_response(ret)
         except SerialException:
             _LOGGER.error("Problem communicating with %s", self._port)
@@ -228,3 +242,19 @@ class SentioPro:
             return HVAC_MODE_HEAT
         else:
             return HVAC_MODE_OFF
+
+    @property
+    def sw_version(self):
+        return self._sw_version
+
+    @property
+    def type(self):
+        return self._type
+
+    @property
+    def config(self):
+        return self._config
+
+    @property
+    def status(self):
+        return self._status

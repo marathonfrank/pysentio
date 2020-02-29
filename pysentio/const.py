@@ -1,7 +1,7 @@
 """pysentio - constants"""
 
 NAME = 'pysentio'
-VERSION = '0.0.43'
+VERSION = '0.0.44'
 
 SERIAL_READ_TIMEOUT = 2
 

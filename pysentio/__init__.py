@@ -26,6 +26,9 @@ class SentioPro:
     _heattimer_val = 1440
     _user_prog = False
     _user_prog_val = 1
+    _config = ''
+    _sw_version = ''
+    _model = ''
     
     def __init__(self, port, baud, timeout=SERIAL_READ_TIMEOUT):
         self._port = port
@@ -92,6 +95,13 @@ class SentioPro:
             else:
                 self._heattimer_val = int(pc1.replace('min', ''))
 
+        elif piece[0] == 'CONFIG':
+            self._config = resp
+
+        elif piece[0] == 'INFO':
+            self._sw_version = piece[2]
+            self._type = piece[4]
+
     def update(self):
         resp = self._write_read('get light\n')
         resp = self._write_read('get light val\n')
@@ -103,6 +113,10 @@ class SentioPro:
         resp = self._write_read('get fan val\n')
         resp = self._write_read('get heattimer\n')
         resp = self._write_read('get heattimer val\n')
+
+    def get_config(self)
+        self._write_read('get config\n')
+        self._write_read('get info\n')    
 
     def _write_cmd(self, cmd):
         """Write a cmd."""

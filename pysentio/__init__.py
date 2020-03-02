@@ -7,6 +7,7 @@ PYS_STATE_OFF = 'off'
 from serial import Serial, SerialException
 from .const import NAME, VERSION, DEFAULT_BAUD, DEFAULT_SERIALPORT, SERIAL_READ_TIMEOUT
 import logging
+import re
 
 __version__ = VERSION
 _LOGGER = logging.getLogger(NAME)
@@ -257,10 +258,10 @@ class SentioPro:
     def type(self):
         return self._type
 
-    @property
+
     def config(self, opt):
-        for line in self._config:
-            if re.match(opt, line):
+        for line in self._config.lower().splitlines():
+            if re.match(opt, line.lower()):
                 st = re.split(opt, line)
                 return st[1].strip()
         return None

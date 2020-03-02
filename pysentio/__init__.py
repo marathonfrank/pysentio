@@ -1,9 +1,9 @@
-from homeassistant.components.climate.const import HVAC_MODE_OFF, HVAC_MODE_HEAT
-from homeassistant.const import STATE_OFF, STATE_ON
-#HVAC_MODE_OFF = 'off'
-#HVAC_MODE_ON = 'on'
-#STATE_ON = 'on'
-#STATE_OFF = 'off'
+"""Python library for Sentio Pro Sauna controllers - developed for Homeassistant"""
+
+PYS_HVAC_MODE_OFF = 'off'
+PYS_HVAC_MODE_HEAT = 'heat'
+PYS_STATE_ON = 'on'
+PYS_STATE_OFF = 'off'
 from serial import Serial, SerialException
 from .const import NAME, VERSION, DEFAULT_BAUD, DEFAULT_SERIALPORT, SERIAL_READ_TIMEOUT
 import logging
@@ -13,7 +13,7 @@ _LOGGER = logging.getLogger(NAME)
 
 class SentioPro:
     _sauna = False
-    _sauna_val = 75
+    _sauna_val = 70
     _light = False
     _light_val = 0
     _fan = False
@@ -102,7 +102,7 @@ class SentioPro:
 
         elif piece[0] == 'CONFIG':
             piece2 = resp.replace(';', '')
-            self._config = piece2.split()
+            self._config = piece2
 
         elif piece[0] == 'STATUS':
             piece2 = resp.replace(';', '')
@@ -162,7 +162,7 @@ class SentioPro:
         return self._sauna
 
     def set_sauna(self, state):
-        if state == STATE_ON:
+        if state == PYS_STATE_ON:
             self._write_read('set sauna on\n')
         else:
             self._write_read('set sauna off\n')
@@ -177,13 +177,13 @@ class SentioPro:
 
     def set_sauna_val(self, val):
         self._write_read('set sauna val {}\n'.format(val))
- 
+
     @property
     def light_is_on(self):
         return self._light
 
     def set_light(self, state):
-        if state == STATE_ON:
+        if state == PYS_STATE_ON:
             self._write_read('set light on\n')
         else:
             self._write_read('set light off\n')
@@ -195,6 +195,12 @@ class SentioPro:
     @property
     def fan_val(self):
         return self._fan_val
+
+    def set_fan(self, state):
+        if state == PYS_STATE_ON:
+            self._write_read('set fan on\n')
+        else:
+            self._write_read('set fan off\n')
 
     @property
     def heattimer_is_on(self):
@@ -239,9 +245,9 @@ class SentioPro:
     @property
     def hvac_mode(self):
         if self._sauna:
-            return HVAC_MODE_HEAT
+            return PYS_HVAC_MODE_HEAT
         else:
-            return HVAC_MODE_OFF
+            return PYS_HVAC_MODE_OFF
 
     @property
     def sw_version(self):
@@ -252,8 +258,12 @@ class SentioPro:
         return self._type
 
     @property
-    def config(self):
-        return self._config
+    def config(self, opt):
+        for line in self._config:
+            if re.match(opt, line):
+                st = re.split(opt, line)
+                return st[1].strip()
+        return None
 
     @property
     def status(self):

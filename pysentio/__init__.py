@@ -79,7 +79,7 @@ class SentioPro:
         elif piece[0] == 'TEMP-HEATER':
             self._heater_temperature_val = int(pc1.replace('c', ''))
 
-        elif piece[0] == 'FOIL-TEMP':
+        elif piece[0] == 'TEMP-FOIL':
             self._foil_temperature_val = int(pc1.replace('c', ''))
 
         elif piece[0] == 'HUMIDITY':
@@ -122,6 +122,8 @@ class SentioPro:
         resp = self._write_read('get sauna val\n')
         resp = self._write_read('get temp-bench val\n')
         resp = self._write_read('get temp-heater val\n')
+        resp = self._write_read('get temp-foil val\n')
+        resp = self._write_read('get humidity val\n')
         resp = self._write_read('get fan\n')
         resp = self._write_read('get fan val\n')
         resp = self._write_read('get heattimer\n')

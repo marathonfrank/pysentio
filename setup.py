@@ -22,7 +22,7 @@ def find_version(*file_paths):
 
 
 setuptools.setup(
-    name="pysentio", 
+    name="pysentio",
     version=find_version('pysentio', 'const.py'),
     author="Ake Strandberg",
     author_email="ake@strandberg.eu",
@@ -39,8 +39,8 @@ setuptools.setup(
     #   3 - Alpha
     #   4 - Beta
     #   5 - Production/Stable
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
     ],
-    python_requires='>=3.6',
+    python_requires='>=3.8',
     install_requires=["pyserial>=3.4"],
 )

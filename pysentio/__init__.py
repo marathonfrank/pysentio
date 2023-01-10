@@ -14,17 +14,19 @@ _LOGGER = logging.getLogger(NAME)
 
 class SentioPro:
     _sauna = False
-    _sauna_val = 70
+    _sauna_val = None
     _light = False
     _light_val = 0
     _fan = False
     _fan_val = 0
-    _evaporator = False
-    _evaporator_val = 0
-    _bench_temperature_val = 20
-    _heater_temperature_val = 20
-    _humidity_val = 50
-    _foil_temperature_val = 20
+    _steam = None
+    _steam_val = None
+    _i_switch = None
+    _i_switch_val = None
+    _bench_temperature_val = None
+    _heater_temperature_val = None
+    _humidity_val = None
+    _foil_temperature_val = None
     _timer = False
     _timer_val = 1440
     _heattimer = False
@@ -37,6 +39,7 @@ class SentioPro:
     _status = ''
 
     def __init__(self, port, baud, timeout=SERIAL_READ_TIMEOUT):
+        _LOGGER.debug("Starting pysentio - version: %s", VERSION)
         self._port = port
         self._baud = baud
         self._timeout = timeout
@@ -93,6 +96,14 @@ class SentioPro:
             else:
                 self._fan_val = int(pc1.replace('%', ''))
 
+        elif piece[0] == 'STEAM':
+            if pc1 == 'on':
+                self._steam = True
+            elif pc1 == 'off':
+                self._steam = False
+            else:
+                self._steam_val = int(pc1.replace('%', ''))
+
         elif piece[0] == 'HEATTIMER':
             if pc1 == 'on':
                 self._heattimer = True
@@ -100,6 +111,14 @@ class SentioPro:
                 self._heattimer = False
             else:
                 self._heattimer_val = int(pc1.replace('min', ''))
+
+        elif piece[0] == 'TIMER':
+            if pc1 == 'on':
+                self._timer = True
+            elif pc1 == 'off':
+                self._timer = False
+            else:
+                self._timer_val = int(pc1.replace('min', ''))
 
         elif piece[0] == 'CONFIG':
             piece2 = resp.replace(';', '')
@@ -126,8 +145,14 @@ class SentioPro:
         resp = self._write_read('get humidity val\n')
         resp = self._write_read('get fan\n')
         resp = self._write_read('get fan val\n')
+        resp = self._write_read('get timer\n')
+        resp = self._write_read('get timer val\n')
         resp = self._write_read('get heattimer\n')
         resp = self._write_read('get heattimer val\n')
+        resp = self._write_read('get i-switch\n')
+        resp = self._write_read('get i-switch val\n')
+        resp = self._write_read('get steam\n')
+        resp = self._write_read('get steam val\n')
 
     def get_config(self):
         self._write_read('get config\n')
@@ -179,7 +204,7 @@ class SentioPro:
         return self._sauna_val
 
     def set_sauna_val(self, val):
-        self._write_read('set sauna val {}\n'.format(val))
+        self._write_read(f'set sauna val {val}\n')
 
     @property
     def light_is_on(self):
@@ -190,6 +215,9 @@ class SentioPro:
             self._write_read('set light on\n')
         else:
             self._write_read('set light off\n')
+
+    def set_light_val(self, val):
+        self._write_read(f'set light val {val}\n')
 
     @property
     def fan(self):
@@ -205,21 +233,76 @@ class SentioPro:
         else:
             self._write_read('set fan off\n')
 
+    def set_fan_val(self, val):
+        self._write_read(f'set fan val {val}\n')
+
+    @property
+    def steam(self):
+        return self._steam
+
+    @property
+    def steam_val(self):
+        return self._steam_val
+
+    def set_steam(self, state):
+        if state == PYS_STATE_ON:
+            self._write_read('set steam on\n')
+        else:
+            self._write_read('set steam off\n')
+
+    def set_steam_val(self, val):
+        self._write_read(f'set steam val {val}\n')
+
+    @property
+    def i_switch(self):
+        return self._i_switch
+
+    @property
+    def i_switch_val(self):
+        return self._i_switch_val
+
+    def set_i_switch(self, state):
+        if state == PYS_STATE_ON:
+            self._write_read('set i-switch on\n')
+        else:
+            self._write_read('set i-switch off\n')
+
+    def set_i_switch_val(self, val):
+        self._write_read(f'set i-switch val {val}\n')
+
     @property
     def heattimer_is_on(self):
         return self._heattimer
+
+    def set_heattimer(self, state):
+        if state == PYS_STATE_ON:
+            self._write_read('set heat-timer on\n')
+        else:
+            self._write_read('set heat-timer off\n')
 
     @property
     def heattimer_val(self):
         return self._heattimer_val
 
+    def set_heattimer_val(self, val):
+        self._write_read(f'set heat-timer val {val}\n')
+
     @property
     def timer_is_on(self):
         return self._timer
 
+    def set_timer(self, state):
+        if state == PYS_STATE_ON:
+            self._write_read('set timer on\n')
+        else:
+            self._write_read('set timer off\n')
+
     @property
     def timer_val(self):
         return self._timer_val
+
+    def set_timer_val(self, val):
+        self._write_read(f'set timer val {val}\n')
 
     @property
     def bench_temperature(self):
@@ -267,6 +350,10 @@ class SentioPro:
                 st = re.split(opt, line)
                 return st[1].strip()
         return None
+
+    @property
+    def config_raw(self):
+        return self._config
 
     @property
     def status(self):

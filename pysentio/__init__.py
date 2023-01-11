@@ -210,6 +210,10 @@ class SentioPro:
     def light_is_on(self):
         return self._light
 
+    @property
+    def light_val(self):
+        return self._light_val
+
     def set_light(self, state):
         if state == PYS_STATE_ON:
             self._write_read('set light on\n')
